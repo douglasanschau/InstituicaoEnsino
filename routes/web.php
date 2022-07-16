@@ -18,5 +18,6 @@ use App\Http\Controllers\InstituicaoController;
   //  return view('welcome');
 //});
 
-Route::get('/painel', [InstituicaoController::class, 'index']);
+Route::get('/painel', [InstituicaoController::class, 'index'])->name('painel');
+Route::get('/painel/dados', [InstituicaoController::class, 'dadosPainel'])->name('dados_painel');
 
