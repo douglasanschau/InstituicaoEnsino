@@ -25,6 +25,15 @@ class Matriculas extends Model
                     ->join('matriculas_situacao', 'matriculas_situacao.sigla', 'matriculas.situacao')
                     ->get();
     }
+
+    public static function getAlunosCursos()
+    {
+        return self::select('matriculas.id', 'cursos.nome as curso')
+                  ->join('alunos', 'alunos.matricula', 'matriculas.id')
+                  ->join('cursos', 'cursos.id', 'matriculas.curso')
+                  ->get();
+    }
+
 }
 
 

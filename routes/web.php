@@ -21,3 +21,5 @@ use App\Http\Controllers\InstituicaoController;
 Route::get('/painel', [InstituicaoController::class, 'index'])->name('painel');
 Route::get('/painel/dados', [InstituicaoController::class, 'dadosPainel'])->name('dados_painel');
 
+Route::get('/cursos', [InstituicaoController::class, 'cursos'])->name('cursos');
+Route::get('/cursos/listagem', [InstituicaoController::class, 'listaCursos'])->name('lista_cursos');
