@@ -24,6 +24,7 @@
     "dependencies": {
         "@selectize/selectize": "^0.13.5",
         "apexcharts": "^3.35.3",
-        "materialize-css": "^1.0.0-rc.2"
+        "materialize-css": "^1.0.0-rc.2",
+        "sweetalert2": "^11.4.26"
     }
 }

@@ -6,6 +6,7 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.css">
     <script type="text/JavaScript" src="{{ asset('js/app.js') }}"></script>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.js"></script>
   </head>
   <body>
@@ -20,6 +21,9 @@
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#">Alunos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">LogOut</a>
             </li>
           </ul>
         </div>

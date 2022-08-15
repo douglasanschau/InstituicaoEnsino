@@ -13,7 +13,12 @@
                 </div>
                 <div class="row mt-5">   
                     <div class="card p-4">
-                        <div class='col-md-12 table-responsive'>
+                        <div class="row mt-2">
+                           <div class="col-md-2 ml-2">
+                               <button type="button" class="btn btn-success cadastra-cursos">Cadastrar Curso</button>
+                           </div>
+                        </div>
+                        <div class='col-md-12 mt-5 table-responsive'>
                             <table id="table-cursos" class='table'>
                                 <thead class='bg-dark text-white' >
                                     <tr>
@@ -34,4 +39,7 @@
         </div>
     </body>
 </html>
+
+@include('modals.cadastra-cursos')
+
 <script type="text/JavaScript" src="{{ asset('js/instituicaoEnsino/cursos.js') }}"></script>
