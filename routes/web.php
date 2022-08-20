@@ -23,3 +23,4 @@ Route::get('/painel/dados', [InstituicaoController::class, 'dadosPainel'])->name
 
 Route::get('/cursos', [InstituicaoController::class, 'cursos'])->name('cursos');
 Route::get('/cursos/listagem', [InstituicaoController::class, 'listaCursos'])->name('lista_cursos');
+Route::post('/cursos/instituicao_cursos', [InstituicaoController::class, 'cursosInstituicao'])->name('instituicao_cursos');

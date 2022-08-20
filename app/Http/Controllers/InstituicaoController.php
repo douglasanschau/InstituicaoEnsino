@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Yajra\Datatables\Facades\Datatables;
 
-use App\Controllers\CursosController;
+use App\Http\Controllers\CursosController;
 
 class InstituicaoController extends Controller
 {
@@ -47,7 +47,7 @@ class InstituicaoController extends Controller
         return datatables($cursos)->toJson();
     }
 
-    public function novoCurso(Request $request)
+    public function cursosInstituicao(Request $request)
     {
         $dados  = $request->all();
         $curso  = new CursosController;
@@ -57,9 +57,10 @@ class InstituicaoController extends Controller
             return json_encode(array('validator_fail' => $valida['message']));
         }
 
-        $curso->cadastraCurso($valida['dados']);
+        $retorno = $curso->atualizaCursos($valida['curso']);
 
-        return json_encode(array('cadastro' => 'ok'));
+        return json_encode($retorno);
+        //return json_encode(array('cadastro' => mensagensSucesso('cadastrar', 'Curso')));
     }
 
 }

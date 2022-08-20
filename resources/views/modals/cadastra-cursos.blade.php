@@ -6,6 +6,7 @@
         </div>
         <div class="modal-body">
           <form id="form-cadastra-cursos">
+             <input type="hidden" name="acao" value="cadastrar">
              <div class="row">
                  <div class="col-md-6"> 
                     <label for="curso"> Curso </label>

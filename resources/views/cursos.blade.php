@@ -4,6 +4,7 @@
         <title>Home</title>
         <meta charset="utf-8">
         <link href="{{ asset('css/cursos.css') }}" rel="stylesheet">
+        <meta name="csrf-token" content="{{ csrf_token() }}" />
     </head>
     <body>
         <div class="container-fluid">

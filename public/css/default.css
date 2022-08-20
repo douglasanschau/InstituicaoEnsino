@@ -4,18 +4,22 @@ body {
     padding: 40px;
  }
  
- .navbar-navegacao {
-     border-radius: 5px;
-     font-size: 20px;
-     padding:10px 15px;
- }
+.navbar-navegacao {
+    border-radius: 5px;
+    font-size: 20px;
+    padding:10px 15px;
+}
  
- #barraNavegacao{
-     justify-content: flex-end;
- }
+#barraNavegacao{
+    justify-content: flex-end;
+}
  
- .navbar-navegacao li {
-     padding-left:10px;
-     text-transform: uppercase;
- }
+.navbar-navegacao li {
+    padding-left:10px;
+    text-transform: uppercase;
+}
  
+
+button{
+   text-transform:uppercase;
+}
