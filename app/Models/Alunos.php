@@ -12,7 +12,6 @@ class Alunos extends Model
 
     protected $fillable = [
         'id',
-        'matricula',
         'nome',
         'sobrenome',
         'data_nascimento',

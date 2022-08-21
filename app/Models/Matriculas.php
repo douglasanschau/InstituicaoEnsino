@@ -13,6 +13,7 @@ class Matriculas extends Model
     protected $fillable = [
         'id',
         'curso',
+        'matricula',
         'semestre',
         'situacao',
         'created_at',
@@ -29,7 +30,7 @@ class Matriculas extends Model
     public static function getAlunosCursos()
     {
         return self::select('matriculas.id', 'cursos.nome as curso')
-                  ->join('alunos', 'alunos.matricula', 'matriculas.id')
+                  ->join('alunos', 'alunos.id', 'matriculas.aluno')
                   ->join('cursos', 'cursos.id', 'matriculas.curso')
                   ->get();
     }

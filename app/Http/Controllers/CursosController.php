@@ -20,7 +20,7 @@ class CursosController extends controller
           $retorno = CursosController::editaCurso($dados);
         break;
         default:
-          $retorno = CursosController::excluiCurso($dados);
+          $retorno = CursosController::desativaCurso($dados);
         break;
      }
    
@@ -38,16 +38,11 @@ class CursosController extends controller
       return array('cadastro' => mensagensSucesso('cadastrar', 'Curso'));
    }
 
-   public function editaCurso($dados)
+   private function editaCurso($dados)
    {
-     if(!is_null($dados['id'])){
+     $curso = isset($dados['id']) ? Cursos::getCurso($dados['id']) : null;
 
-        $curso = Cursos::where('id', $dados['id'])->first();
-
-        if(is_null($curso)){
-            return array('validator_fails' => 'Não foi possível editar este curso.');
-        }
-
+     if(!is_null($curso)){
         $curso->nome = $dados['curso'];
         $curso->carga_horaria = $dados['carga_horaria'];
         $curso->save();
@@ -55,9 +50,22 @@ class CursosController extends controller
         return array('editado' =>  mensagensSucesso('editar', 'Curso'));
      }
 
-     return array('validator_fails' => 'Não foi possível editar este curso.');
+     return array('validator_fail' => 'Não foi possível editar este curso.');
    }
 
+   private function desativaCurso($dados)
+   {
+      $curso = isset($dados['id']) ? Cursos::getCurso($dados['id']) : null;
+
+      if(!is_null($curso)){
+        $curso->ativo = 0;
+        $curso->save();
+
+        return array('desativado' =>  mensagensSucesso('desativar', 'Curso'));
+      }
+
+      return array('validator_fail' => 'Não foi possível excluir este curso.');
+   }
 
    public static function validarCurso($dados)
    {

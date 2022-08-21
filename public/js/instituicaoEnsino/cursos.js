@@ -30,10 +30,10 @@ function acoesDataTable(id){
                       <button type='button' class='btn btn-info editar-curso' ref='${id}' title='Editar'>
                         <i class='material-icons'>edit</i>
                       </button>
-                      <button type='button' class='btn btn-danger' ref='${id}' title='Excluir'>
-                         <i class='material-icons'>delete</i>
+                      <button type='button' class='btn btn-warning desativar-curso' ref='${id}' title='Desativar'>
+                         <i class='material-icons'>remove_circle</i>
                       </button>
-                </div>`;
+                  </div>`;
     return buttons;
 }
 
@@ -205,3 +205,40 @@ function editarCurso(form){
         }
     })
 } 
+
+$(document).on('click', '.desativar-curso', function(){
+    Swal.fire({
+        title: 'Atenção!',
+        text: 'Deseja desativar este curso?',
+        icon: 'warning',
+        showCancelButton: true, 
+        cancelButtonText: "Não",
+        confirmButtonText: 'Sim',
+        cancelButtonColor: "#d9534f",
+        confirmButtonColor: "#5cb85c",
+    }).then((result) => {
+        if(result.value){
+            desativarCurso($(this).attr('ref'));
+        }
+    });
+})
+
+function desativarCurso(id){
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        url: '/cursos/instituicao_cursos',
+        type: 'POST',
+        data: 'id=' + id + '&acao=desativar',
+        dataType:'json',
+        success:function(response){
+           if(response.validator_fail){
+               mensagemErro(response.validator_fail);
+           } else {
+               mensagemSucesso(response.desativado);
+               $('#table-cursos').DataTable().ajax.reload();
+           }
+        }
+    })
+}

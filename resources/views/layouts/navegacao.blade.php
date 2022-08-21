@@ -20,10 +20,10 @@
               <a class="nav-link" href="{{route('cursos')}}">Cursos</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">Alunos</a>
+              <a class="nav-link" href="{{route('matriculas')}}">Matriculas</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">LogOut</a>
+              <a class="nav-link disabled" href="#">Logout</a>
             </li>
           </ul>
         </div>

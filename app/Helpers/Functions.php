@@ -16,8 +16,8 @@ function mensagensSucesso($tipo, $atributo){
             $mensagem = "O {$atributo} foi editado com sucesso.";
         break;
         default: 
-            $titulo   = "{$atributo} Excluído!"; 
-            $mensagem = "O {$atributo} foi excluído com sucesso.";
+            $titulo   = "{$atributo} Desativado!"; 
+            $mensagem = "O {$atributo} foi desativado com sucesso.";
         break;
     }
 

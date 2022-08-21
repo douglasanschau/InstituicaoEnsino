@@ -25,6 +25,12 @@ class Cursos extends Model
                     ->orderBy('nome')
                     ->get();
     }
+
+    public static function getCurso($id)
+    {
+        return self::where('id', $id)
+                    ->first();
+    }
 }
 
 

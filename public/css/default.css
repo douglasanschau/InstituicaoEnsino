@@ -20,6 +20,27 @@ body {
 }
  
 
+table {
+    width:100%;
+}
+
+thead {
+    text-transform:uppercase;
+    text-align:center;
+}
+
+.dataTables_filter{
+    margin-bottom:10px;
+}
+
+.acoes button {
+    color:#FFFFFF;
+}
+
+.acoes button:hover {
+    color:#FFFFFF;
+}
+
 button{
    text-transform:uppercase;
 }

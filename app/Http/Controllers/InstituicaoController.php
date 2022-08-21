@@ -27,7 +27,7 @@ class InstituicaoController extends Controller
 
         $dados['cards']  =  array(
                              'alunos' => Matriculas::where('situacao', 'A')->count(),
-                             'cursos' => Cursos::count(),
+                             'cursos' => Cursos::where('ativo', 1)->count(),
                             );
 
         return json_encode($dados);
@@ -42,7 +42,9 @@ class InstituicaoController extends Controller
     {
         $cursos = Cursos::select('id', 'nome as curso', 'carga_horaria', 
                                   DB::raw('DATE_FORMAT(created_at, "%d/%m/%Y") as data_cadastro'))
-                                  ->orderBy('nome')->get();
+                                  ->where('ativo', 1)
+                                  ->orderBy('nome')
+                                  ->get();
 
         return datatables($cursos)->toJson();
     }
@@ -51,17 +53,36 @@ class InstituicaoController extends Controller
     {
         $dados  = $request->all();
         $curso  = new CursosController;
-        $valida = $curso->validarCurso($dados);
+        $valida = isset($dados['acao']) && $dados['acao'] != 'desativar' ? $curso->validarCurso($dados) : null;
 
-        if($valida['error']){
+        if(isset($valida['error']) && $valida['error']){
             return json_encode(array('validator_fail' => $valida['message']));
-        }
+        }   
 
-        $retorno = $curso->atualizaCursos($valida['curso']);
-
+        $retorno = isset($valida['cursos']) ? $curso->atualizaCursos($valida['cursos']) : $curso->atualizaCursos($dados);
+    
         return json_encode($retorno);
-        //return json_encode(array('cadastro' => mensagensSucesso('cadastrar', 'Curso')));
     }
+
+    public function matriculas()
+    {
+        return view('matriculas');
+    }
+
+    public function listaAlunos()
+    {
+        $alunos = Alunos::select('alunos.id', 'alunos.nome as aluno', 'alunos.email', 'cursos.nome as curso', 'matriculas_situacao.situacao')
+                          ->join('matriculas', 'matriculas.aluno', 'alunos.id')
+                          ->join('cursos', 'cursos.id', 'matriculas.curso')
+                          ->join('matriculas_situacao', 'matriculas_situacao.sigla', 'matriculas.situacao')
+                          ->where('cursos.ativo', 1)
+                          ->orderBy('alunos.nome')
+                          ->orderBy('matriculas.situacao')
+                          ->get();
+
+        return datatables($alunos)->toJson();
+    }
+
 
 }
 
