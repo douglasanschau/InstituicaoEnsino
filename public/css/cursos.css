@@ -15,22 +15,6 @@
    margin:0!important;
 }
 
-input {
-    margin-bottom: 10px !important;
-    background-color: #FFFFFF !important;
-}
-
-input:focus{
-    background-color: #FFFFFF !important;
-}
-
-label {
-    color: #6c757d!important;
-    font-weight: 100;
-    font-size: 18px;
-    margin: 5px;
-}
-
 #table-cursos td:nth-child(4){
     width:12% !important;
 }

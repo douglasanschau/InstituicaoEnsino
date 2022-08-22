@@ -1,3 +1,55 @@
+#modalCadastrarMatricula {
+  top:10% !important;
+  bottom: 10% !important;
+}
+
+#modalCadastrarMatricula .modal-dialog {
+    max-width:1000px !important;
+    max-height: 80% !important;
+    overflow-y: auto !important;
+}
+
+#modalCadastrarMatricula .modal-content {
+    padding: 15px 10px !important;
+}
+  
+#modalCadastrarMatricula .modal-header{
+   background-color: #292b2c;
+   display: inline-block !important;
+   text-align:center !important;
+   box-shadow: inset 0 0 4px #FFFFFF;
+}
+
+  
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 1px rgba(7, 7, 7, 0.5);
+    border-radius: 10px;
+}
+ 
+::-webkit-scrollbar-thumb {
+    -webkit-box-shadow: inset 0 0 1px  rgba(7, 7, 7, 0.5);
+    border-radius: 10px;
+    background:rgba(7, 7, 7, 0.5); 
+}
+   
+.title-modal {
+    text-transform:uppercase;
+    color: #FFFFFFFF;
+    font-weight: 500 !important;
+    margin:0!important;
+}
+
+.card-modelo {
+    text-transform: uppercase;
+    text-align:center;
+    padding: 10px;
+    color: #4d4e4f;
+}
+
 #table-matriculas td:nth-child(5){
     width:15% !important;
 }

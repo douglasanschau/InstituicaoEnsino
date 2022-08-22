@@ -44,3 +44,19 @@ thead {
 button{
    text-transform:uppercase;
 }
+
+input, select{
+    margin-bottom: 10px !important;
+    background-color: #FFFFFF !important;
+}
+
+input:focus, select:focus {
+    background-color: #FFFFFF !important;
+}
+
+label {
+    color: #6c757d!important;
+    font-weight: 100;
+    font-size: 18px;
+    margin: 5px;
+}

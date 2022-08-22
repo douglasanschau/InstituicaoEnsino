@@ -20,7 +20,6 @@ class Alunos extends Model
         'cpf',
         'nome_mae',
         'nome_pai',
-        'endereco',
         'created_at',
         'updated_at',
     ];

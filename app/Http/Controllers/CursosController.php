@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cursos;
+
 use Illuminate\Support\Facades\Validator;
 
 class CursosController extends controller

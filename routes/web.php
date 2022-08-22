@@ -27,3 +27,5 @@ Route::post('/cursos/instituicao_cursos', [InstituicaoController::class, 'cursos
 
 Route::get('/matriculas', [InstituicaoController::class, 'matriculas'])->name('matriculas');
 Route::get('/matriculas/listagem_alunos', [InstituicaoController::class, 'listaAlunos'])->name('lista_alunos');
+Route::get('/matriculas/info_aluno', [InstituicaoController::class, 'infoAluno'])->name('info_aluno');
+Route::post('/matriculas/instituicao_matriculas', [InstituicaoController::class, 'matriculasInstituicao'])->name('instituicao_matriculas');
