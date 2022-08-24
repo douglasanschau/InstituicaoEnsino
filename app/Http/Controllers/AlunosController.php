@@ -19,6 +19,77 @@ class AlunosController extends controller
         return $info;
     }
 
+    public function verificaCadastro($dados = array())
+    {
+       $cpf   = isset($dados['cpf']) ? $dados['cpf'] : null;
+       $email = isset($dados['email']) ? $dados['email'] : null;
+
+       $aluno = Alunos::select('id')
+                ->where([['cpf', '!=', ''], ['email', "!=", ""]])
+                ->where(function($query) use($cpf, $email){
+                    $query->where('cpf', $cpf)
+                          ->orWhere('email', $email);
+                })
+                ->whereNotNull('cpf')
+                ->first();
+
+       return isset($aluno) ? $aluno->id : null;
+    }
+
+    public function atualizarAluno($aluno, $id_aluno)
+    {
+      $acao = isset($aluno['acao']) ? $aluno['acao'] : 'cadastrar';
+      
+      if(is_null($id_aluno)){
+          $this->cadastraAluno($aluno);
+      } else if($acao == 'editar' && !is_null($id_aluno) || $acao == "cadastrar" && !is_null($id_aluno)){
+          $this->editaAluno($aluno, $id_aluno);
+      } else {
+          $this->excluiAluno($aluno, $id_aluno);
+      }
+
+    }
+
+    private function cadastraAluno($dados)
+    {
+        $aluno = new Aluno;
+        $aluno->nome            = $dados['nome'];
+        $aluno->sobrenome       = $dados['sobrenome'];
+        $aluno->email           = $dados['email'];
+        $aluno->data_nascimento = $dados['data_nascimento'];
+        $aluno->rg              = $dados['rg'];
+        $aluno->cpf             = $dados['cpf'];
+        $aluno->nome_mae        = $dados['nome_mae'];
+        $aluno->nome_pai        = $dados['nome_pai'];
+        $aluno->save();
+    }
+
+    private function editaAluno($dados, $id_aluno)
+    {
+        $aluno = Alunos::where('id', $id_aluno)->first();
+
+        if(isset($aluno)){
+            $aluno->nome            = $dados['nome'];
+            $aluno->sobrenome       = $dados['sobrenome'];
+            $aluno->email           = $dados['email'];
+            $aluno->data_nascimento = $dados['data_nascimento'];
+            $aluno->rg              = $dados['rg'];
+            $aluno->cpf             = $dados['cpf'];
+            $aluno->nome_mae        = $dados['nome_mae'];
+            $aluno->nome_pai        = $dados['nome_pai'];
+            $aluno->save();
+        }
+    }
+
+    private function excluiAluno($dados, $id_aluno)
+    {
+        $aluno = Alunos::where('id', $id_aluno)->first();
+
+        if(isset($aluno)){
+            $aluno->delete();
+        }
+    }
+
     public function validarDados($dados)
     {
         $aluno = array(
@@ -29,7 +100,7 @@ class AlunosController extends controller
                   'rg' => isset($dados['rg_aluno']) ? (int) str_replace('.', '', $dados['rg_aluno']) : null,
                   'cpf' => isset($dados['cpf_aluno']) ? (int) str_replace('.', '', $dados['cpf_aluno']) : null,
                   'nome_mae' => isset($dados['mae_aluno']) ? $dados['mae_aluno'] : null,
-                  'pai_aluno' => isset($dados['pai_aluno']) ? $dados['pai_aluno'] : null
+                  'nome_pai' => isset($dados['pai_aluno']) ? $dados['pai_aluno'] : null
                 );
 
         $rules     = $this->getValidatorRules();
@@ -42,7 +113,6 @@ class AlunosController extends controller
 
         return array('error' => false, 'aluno' => $aluno);
     }
-
 
     private function getValidatorRules($tipo)
     {

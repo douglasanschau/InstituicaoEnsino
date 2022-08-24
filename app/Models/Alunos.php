@@ -30,6 +30,7 @@ class Alunos extends Model
                     ->orderBy('sobrenome')
                     ->get();
     }
+
 }
 
 
