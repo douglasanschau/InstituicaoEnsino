@@ -4,17 +4,23 @@ namespace App\Http\Controllers;
 
 use App\Models\Alunos;
 use App\Models\Enderecos;
+use App\Models\Matriculas;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class AlunosController extends controller 
 {
-    public function getInfo($id)
+    public function getInfo($id, $id_matricula = null)
     {
         $info = array(
-            'aluno'    => Alunos::where('id', $id)->first(),
+            'aluno'    => Alunos::select("*", DB::raw('DATE_FORMAT(data_nascimento , "%d/%m/%Y") as data_nascimento'))->where('id', $id)->first(),
             'endereco' => Enderecos::where('aluno', $id)->first(),
         );
+
+        if(isset($id_matricula)){
+            $info['matricula'] = Matriculas::where('id', $id_matricula)->first();
+        }
 
         return $info;
     }
@@ -24,14 +30,15 @@ class AlunosController extends controller
        $cpf   = isset($dados['cpf']) ? $dados['cpf'] : null;
        $email = isset($dados['email']) ? $dados['email'] : null;
 
-       $aluno = Alunos::select('id')
-                ->where([['cpf', '!=', ''], ['email', "!=", ""]])
-                ->where(function($query) use($cpf, $email){
-                    $query->where('cpf', $cpf)
-                          ->orWhere('email', $email);
-                })
-                ->whereNotNull('cpf')
-                ->first();
+
+        $aluno = Alunos::select('id')
+                    ->where([['cpf', '!=', ''], ['email', "!=", ""]])
+                    ->where(function($query) use($cpf, $email){
+                            $query->where('cpf', $cpf)
+                                ->orWhere('email', $email);
+                    })
+                    ->whereNotNull('cpf')
+                    ->first();
 
        return isset($aluno) ? $aluno->id : null;
     }
@@ -41,7 +48,7 @@ class AlunosController extends controller
       $acao = isset($aluno['acao']) ? $aluno['acao'] : 'cadastrar';
       
       if(is_null($id_aluno)){
-          $this->cadastraAluno($aluno);
+          return $this->cadastraAluno($aluno);
       } else if($acao == 'editar' && !is_null($id_aluno) || $acao == "cadastrar" && !is_null($id_aluno)){
           $this->editaAluno($aluno, $id_aluno);
       } else {
@@ -52,7 +59,7 @@ class AlunosController extends controller
 
     private function cadastraAluno($dados)
     {
-        $aluno = new Aluno;
+        $aluno = new Alunos;
         $aluno->nome            = $dados['nome'];
         $aluno->sobrenome       = $dados['sobrenome'];
         $aluno->email           = $dados['email'];
@@ -62,6 +69,8 @@ class AlunosController extends controller
         $aluno->nome_mae        = $dados['nome_mae'];
         $aluno->nome_pai        = $dados['nome_pai'];
         $aluno->save();
+
+        return $aluno->id;
     }
 
     private function editaAluno($dados, $id_aluno)
@@ -97,8 +106,8 @@ class AlunosController extends controller
                   'sobrenome' => isset($dados['sobrenome_aluno']) ? $dados['sobrenome_aluno'] : null,
                   'email'     => isset($dados['email_aluno']) ? $dados['email_aluno'] : null,
                   'data_nascimento' => isset($dados['nascimento_aluno']) ? date('Y-m-d', strtotime($dados['nascimento_aluno'])) : null,
-                  'rg' => isset($dados['rg_aluno']) ? (int) str_replace('.', '', $dados['rg_aluno']) : null,
-                  'cpf' => isset($dados['cpf_aluno']) ? (int) str_replace('.', '', $dados['cpf_aluno']) : null,
+                  'rg' => isset($dados['rg_aluno']) ? str_replace('.', '', $dados['rg_aluno']) : null,
+                  'cpf' => isset($dados['cpf_aluno']) ? str_replace('.', '', $dados['cpf_aluno']) : null,
                   'nome_mae' => isset($dados['mae_aluno']) ? $dados['mae_aluno'] : null,
                   'nome_pai' => isset($dados['pai_aluno']) ? $dados['pai_aluno'] : null
                 );
@@ -108,13 +117,13 @@ class AlunosController extends controller
         $validator = Validator::make($aluno, $rules, $messages);
 
         if($validator->fails()){
-            return array('error' => true, 'message' => $validator->error()->first());
+            return array('error' => true, 'message' => $validator->errors()->first());
         }
 
-        return array('error' => false, 'aluno' => $aluno);
+        return $aluno;
     }
 
-    private function getValidatorRules($tipo)
+    private function getValidatorRules()
     {
         return [
             'nome'            => 'required|max:80',
@@ -130,14 +139,13 @@ class AlunosController extends controller
 
     private function getValidatorMessages()
     {
-        $rules =  [
-                    'required' => 'O campo :attribute é obrigatório!',
-                    'max' => 'O campo :attribute não aceita mais de :max caracteres.',
-                    'numeric' => 'O campo :attribute aceita somente caracteres numéricos.',
-                    'digits' => 'O campo :attribute deve ter :value digitos.',
-                    'date' => 'O campo :attribute deve atender o padrão data, mês e ano.'
-                ];
-
+        return [
+            'required' => 'O campo :attribute é obrigatório!',
+            'max' => 'O campo :attribute não aceita mais de :max caracteres.',
+            'numeric' => 'O campo :attribute aceita somente caracteres numéricos.',
+            'digits' => 'O campo :attribute deve ter :digits digitos.',
+            'date' => 'O campo :attribute deve atender o padrão data, mês e ano.'
+        ];
     }
 }
 

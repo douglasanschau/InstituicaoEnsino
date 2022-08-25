@@ -35,6 +35,13 @@ class Matriculas extends Model
                   ->get();
     }
 
+    public static function getMatricula($id_aluno, $curso)
+    {
+        return self::where('aluno', $id_aluno)
+                   ->where('curso', $curso)
+                   ->first();
+    }
+
 }
 
 

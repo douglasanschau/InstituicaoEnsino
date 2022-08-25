@@ -7,7 +7,7 @@
             </div>
             <div class="modal-body">
                 <form id="form-cadastra-matricula">
-                    <input type="hidden" name="acao" value="cadastrar">
+                    <input type="hidden" name="acao" value="">
                     <div class="row">
                         <div class="col-md-6"> 
                             <div class="card">
@@ -19,7 +19,7 @@
                                             <option value=""></option>
                                             <optgroup label="Alunos Cadastrados">
                                                 @foreach($info['alunos'] as $aluno)
-                                                <option value="{{$aluno->id}}">{{trim($aluno->nome)." ".trim($aluno->sobrenome)}}</option>
+                                                    <option value="{{$aluno->id}}">{{trim($aluno->nome)." ".trim($aluno->sobrenome)}}</option>
                                                 @endforeach 
                                             </optgroup>
                                             <optgroup label="Cadastrar Aluno">

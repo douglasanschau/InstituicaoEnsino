@@ -29,19 +29,25 @@ class EnderecosController extends Controller
 
    private function cadastraEndereco($dados, $id_aluno)
    {
-       $endereco = new Endereco;
-       $endereco->aluno      = $id_aluno;
-       $endereco->logradouro = $dados['logradouro'];
-       $endereco->numero     = $dados['numero'];
-       $endereco->bairro     = $dados['bairro'];
-       $endereco->cidade     = $dados['cidade'];
-       $endereco->estado     = $dados['estado'];
-       $endereco->save();
+       $endereco = Enderecos::where('aluno', $id_aluno)->first();
+
+       if(isset($endereco)){
+         $this->editaEndereco($dados, $id_aluno);
+       } else {
+          $endereco = new Enderecos;
+          $endereco->aluno      = $id_aluno;
+          $endereco->logradouro = $dados['logradouro'];
+          $endereco->numero     = $dados['numero'];
+          $endereco->bairro     = $dados['bairro'];
+          $endereco->cidade     = $dados['cidade'];
+          $endereco->estado     = $dados['estado'];
+          $endereco->save();
+       }
    }
 
    private function editaEndereco($dados, $id_aluno)
    {
-       $endereco = Endereco::where([['id_aluno', $id_aluno], ['id', $dados['id']]])->first();
+       $endereco = Enderecos::where('aluno', $id_aluno)->first();
 
        if(isset($endereco)){
           $endereco->logradouro = $dados['logradouro'];
@@ -50,13 +56,15 @@ class EnderecosController extends Controller
           $endereco->cidade     = $dados['cidade'];
           $endereco->estado     = $dados['estado'];
           $endereco->save();
+       } else {
+         $this->cadastraEndereco($dados, $id_aluno);
        }
 
    }
 
    private function excluiEndereco($dados, $id_aluno)
    {
-      $endereco = Endereco::where([['id_aluno', $id_aluno], ['id', $dados['id']]])->first();
+      $endereco = Enderecos::where('id', $dados['id'])->first();
 
       if(isset($endereco)){
         $endereco->delete();
@@ -78,10 +86,10 @@ class EnderecosController extends Controller
       $validator = Validator::make($endereco, $rules, $messages);
 
       if($validator->fails()){
-        return array('error' => true, 'message' => $validator->error()->first());
+        return array('error' => true, 'message' => $validator->errors()->first());
       }
 
-      return array('error' => false, 'endereco' => $endereco);
+      return $endereco;
    }
 
    private function getValidatorRules()

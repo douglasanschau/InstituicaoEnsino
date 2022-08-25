@@ -83,7 +83,7 @@ class InstituicaoController extends Controller
 
     public function listaAlunos()
     {
-        $alunos = Alunos::select('alunos.id', 'alunos.nome as aluno', 'alunos.email', 'cursos.nome as curso', 'matriculas_situacao.situacao')
+        $alunos = Alunos::select('alunos.id', 'matriculas.id as id_matricula', 'alunos.nome as aluno', 'alunos.email', 'cursos.nome as curso', 'matriculas_situacao.situacao')
                           ->join('matriculas', 'matriculas.aluno', 'alunos.id')
                           ->join('cursos', 'cursos.id', 'matriculas.curso')
                           ->join('matriculas_situacao', 'matriculas_situacao.sigla', 'matriculas.situacao')
@@ -98,9 +98,10 @@ class InstituicaoController extends Controller
     public function infoAluno(Request $request)
     {
        $id_aluno = $request->id;
+       $id_matricula = $request->id_matricula;
 
        $aluno = new AlunosController;
-       $info = $aluno->getInfo($id_aluno);
+       $info = $aluno->getInfo($id_aluno, $id_matricula);
 
        return json_encode($info);
     }
@@ -114,22 +115,26 @@ class InstituicaoController extends Controller
         );
 
         foreach($dados as $tipo => $dado){
-            $info[$tipo] = $this->validarMatriculas($dado, $tipo, $id_aluno);
+            $info[$tipo] = $this->validarMatriculas($dado, $tipo);
 
-            if(isset($info[$tipo]['error']) && $info[$tipo]['error']){
+            if(isset($info[$tipo]['error'])){
                 return json_encode(array('validator_fails' => $info[$tipo]['message']));
             }
         }
 
         $aluno = new AlunosController;
-        $id_aluno = $aluno->verificaCadastro($dados['aluno']);
+        $id_aluno = $aluno->verificaCadastro($info['aluno']);
         $aluno->atualizarAluno($info['aluno'], $id_aluno);
+
+        if(is_null($id_aluno)){
+            $id_aluno = $aluno->verificaCadastro($info['aluno']);
+        }
 
         $endereco   = new EnderecosController;
         $endereco->atualizarEndereco($info['endereco'], $id_aluno);
 
         $matricula  = new MatriculasController;
-        $matricula->atualizarMatricula($info['matricula'], $id_aluno);
+        $matricula->atualizarMatricula($dados['matricula'], $id_aluno);
 
         return json_encode(array('registro' => 'ok'));
     }
