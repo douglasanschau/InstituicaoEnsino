@@ -3,7 +3,10 @@
 
 namespace App\Http\Controllers;
 
+
+use App\Models\Alunos;
 use App\Models\Cursos;
+use App\Models\LogMatriculas;
 use App\Models\Matriculas;
 
 use Illuminate\Support\Facades\DB;
@@ -22,7 +25,7 @@ class MatriculasController extends Controller
       }
     }
 
-    public function atualizarMatricula($dados, $id_aluno)
+    public function atualizarMatricula($dados, $id_aluno = null)
     {
        $acao      = isset($dados['acao']) ? $dados['acao'] : 'cadastrar';
 
@@ -34,7 +37,7 @@ class MatriculasController extends Controller
            $this->editaMatricula($dados, $id_aluno);
          break;
          default:
-          $this->excluiMatricula($matricula);
+          $this->excluiMatricula($dados);
          break;
        }
 
@@ -52,7 +55,7 @@ class MatriculasController extends Controller
           $matricula->situacao = $dados['situacao'];
           $matricula->save();
         } else {
-          $this->editaMatricula($dados, $matricula->id_aluno);
+          $this->editaMatricula($dados, $matricula->aluno);
         }
     }
 
@@ -73,11 +76,22 @@ class MatriculasController extends Controller
     private function excluiMatricula($dados)
     {
       $matricula = Matriculas::where('id', $dados['id'])->first();
-
       if(!is_null($matricula)){
+        $this->registraLogMatricula($matricula->aluno, $matricula->curso);
         $matricula->delete();
       }
+    }
 
+    private function registraLogMatricula($aluno, $curso)
+    {
+      $aluno = Alunos::select('nome')->where('id', $aluno)->first();
+      $aluno = ucfirst($aluno->nome);
+      $curso = Cursos::select('nome')->where('id', $curso)->first();
+      $curso = ucfirst($curso->nome);
+
+      $log = new LogMatriculas;
+      $log->registro = "{$aluno} teve seu registro no curso de {$curso} excluído.";
+      $log->save();
     }
 
 

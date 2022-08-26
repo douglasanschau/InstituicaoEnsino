@@ -38,6 +38,7 @@ function acoesDataTable(id){
 }
 
 $('.cadastra-cursos').on('click', function(){
+    $('#modalCadastrarCursos #form-cadastra-cursos input[name="acao"]').val('cadastrar');
     $("#modalCadastrarCursos").modal('show');
 })
 

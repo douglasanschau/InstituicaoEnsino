@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Alunos;
 use App\Models\Cursos;
-use App\Models\Matriculas;
 use App\Models\Estados;
+use App\Models\Enderecos;
+use App\Models\Matriculas;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -30,7 +31,7 @@ class InstituicaoController extends Controller
         $dados['semestres']        = Matriculas::getMatriculas()->groupBy('semestre')->toArray();
 
         $dados['cards']  =  array(
-                             'alunos' => Matriculas::where('situacao', 'A')->count(),
+                             'alunos' => Matriculas::where('matriculas.situacao', 'A')->count(DB::raw('DISTINCT(aluno)')),
                              'cursos' => Cursos::where('ativo', 1)->count(),
                             );
 
@@ -72,7 +73,6 @@ class InstituicaoController extends Controller
     {
 
         $info = array(
-            'alunos'              => Alunos::select('id', 'nome', 'sobrenome')->orderBy('nome')->orderBy('sobrenome')->groupBy('id')->get(),
             'cursos'              => Cursos::select('id', 'nome')->where('ativo', 1)->orderBy('nome')->groupBy('id')->get(),
             'matriculas_situacao' => DB::table('matriculas_situacao')->select('sigla', 'situacao')->groupBy('id')->get(),
             'estados'             => Estados::select('id', 'sigla')->orderBy('sigla')->get(),
@@ -95,6 +95,12 @@ class InstituicaoController extends Controller
         return datatables($alunos)->toJson();
     }
 
+    public function getAlunos()
+    {
+        $alunos = Alunos::select('id', 'nome', 'sobrenome')->orderBy('nome')->orderBy('sobrenome')->groupBy('id')->get();
+        return json_encode($alunos);
+    }
+
     public function infoAluno(Request $request)
     {
        $id_aluno = $request->id;
@@ -106,37 +112,79 @@ class InstituicaoController extends Controller
        return json_encode($info);
     }
 
-    public function matriculasInstituicao(Request $request)
+    public function instituicaoAlunos(Request $request)
     {
-        $dados = array (
-            'aluno'     => $request->except(['logradouro', 'numero', 'bairro', 'cidade', 'estado', 'curso', 'situacao', 'semestre']),
-            'endereco'  => $request->only(['acao','logradouro', 'numero', 'bairro', 'cidade', 'estado']),
-            'matricula' => $request->only(['acao','curso', 'situacao', 'semestre'])
-        );
+       $dados = $request->except(['logradouro', 'numero', 'bairro', 'cidade', 'estado', 'curso', 'situacao', 'semestre']);
+       $info  = $this->validarMatriculas($dados, 'aluno');
 
-        foreach($dados as $tipo => $dado){
-            $info[$tipo] = $this->validarMatriculas($dado, $tipo);
+       if(isset($info['error'])){
+         return json_encode(array('validator_fails' => $info['message']));
+       }
 
-            if(isset($info[$tipo]['error'])){
-                return json_encode(array('validator_fails' => $info[$tipo]['message']));
-            }
+       $aluno = new AlunosController;
+       $id_aluno = $aluno->verificaCadastro($info);
+       $aluno->atualizarAluno($info, $id_aluno);
+
+       if(isset($id_aluno)){
+           $title   = 'Aluno Editado!';
+           $message = 'Aluno editado com sucesso.';
+       } else {
+            $title   = 'Aluno Cadastrado!';
+            $message = 'Aluno cadastrado com sucesso.';
+            $id_aluno = $aluno->verificaCadastro($info);
+       }
+       
+       return  json_encode(array('title' => $title, 'message' => $message, 'id_aluno' => $id_aluno));
+    }
+
+    public function instituicaoEnderecos(Request $request)
+    {
+        $dados = $request->only(['acao','logradouro', 'numero', 'bairro', 'cidade', 'estado', 'aluno']);
+        $info  = $this->validarMatriculas($dados, 'endereco');
+
+        if(isset($info['error'])){
+            return json_encode(array('validator_fails' => $info['message']));
+        }
+   
+        $id_endereco = Enderecos::where('aluno', $dados['aluno'])->first();
+
+        $endereco    = new EnderecosController;
+        $endereco->atualizarEndereco($info, $dados['aluno']);
+   
+        if(isset($id_endereco)){
+           $title   = 'Endereço Editado!';
+           $message = 'Endereço editado com sucesso.';
+        } else {
+           $title   = 'Endereço Cadastrado!';
+           $message = 'Endereço cadastrado com sucesso.';
+        }
+          
+        return  json_encode(array('title' => $title, 'message' => $message));
+    }
+
+    public function instituicaoMatriculas(Request $request)
+    {
+        $dados = $request->only(['acao','curso', 'situacao', 'semestre', 'aluno']);
+        $info  = $this->validarMatriculas($dados, 'matricula');
+
+        if(isset($info['error'])){
+            return json_encode(array('validator_fails' => $info['message']));
         }
 
-        $aluno = new AlunosController;
-        $id_aluno = $aluno->verificaCadastro($info['aluno']);
-        $aluno->atualizarAluno($info['aluno'], $id_aluno);
+        $id_matricula =  Matriculas::getMatricula($dados['aluno'], $dados['curso']);
 
-        if(is_null($id_aluno)){
-            $id_aluno = $aluno->verificaCadastro($info['aluno']);
+        $matricula    = new MatriculasController;
+        $matricula->atualizarMatricula($dados, $dados['aluno']);
+
+        if(isset($id_matricula)){
+            $title   = 'Matricula Editada!';
+            $message = 'Matricula editada com sucesso.';
+        } else {
+            $title   = 'Matricula Cadastrada!';
+            $message = 'Matricula cadadastrada com sucesso.';
         }
 
-        $endereco   = new EnderecosController;
-        $endereco->atualizarEndereco($info['endereco'], $id_aluno);
-
-        $matricula  = new MatriculasController;
-        $matricula->atualizarMatricula($dados['matricula'], $id_aluno);
-
-        return json_encode(array('registro' => 'ok'));
+        return json_encode(array('title' => $title, 'message' => $message));
     }
 
     private function validarMatriculas($dados, $tipo)
@@ -157,6 +205,16 @@ class InstituicaoController extends Controller
         }
 
         return $info;
+    }
+
+    public function excluirMatricula(Request $request)
+    {
+        $dados = array('id' => $request->id_matricula, 'acao' => 'excluir');
+        
+        $matricula = new MatriculasController;
+        $matricula->atualizarMatricula($dados);
+
+        return json_encode(array('excluido' => 'ok'));
     }
 
 }

@@ -21,7 +21,7 @@
                                     <i class="material-icons icons-dash">
                                         people
                                     </i>
-                                     Total de Alunos
+                                     Alunos Ativos
                                 </h5>
                                 <span class="info-dash info-dash-alunos"> </span>
                              </div>

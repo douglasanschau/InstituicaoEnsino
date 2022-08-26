@@ -4,7 +4,7 @@
 }
 
 #modalCadastrarMatricula .modal-dialog {
-    max-width:1000px !important;
+    max-width:800px !important;
     max-height: 80% !important;
     overflow-y: auto !important;
 }
@@ -18,6 +18,27 @@
    display: inline-block !important;
    text-align:center !important;
    box-shadow: inset 0 0 4px #FFFFFF;
+}
+
+#modalCadastrarMatricula .etapa-matricula .circle{
+    border-radius:50%;
+    background-color: #606163;
+    height:110px;
+    width:110px;
+    display:flex;
+    margin:0 auto;
+}
+
+#modalCadastrarMatricula .etapa-matricula .circle::after{
+   content:attr(legenda);
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   text-align:center;
+   width: 100%;
+   color: #FFFFFF; 
+   text-shadow: 1px 1px 1px #000000;
+   margin: 0 !important;
 }
 
   
@@ -53,5 +74,7 @@
 #table-matriculas td:nth-child(5){
     width:12% !important;
 }
+
+
 
   

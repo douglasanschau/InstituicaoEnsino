@@ -44,7 +44,6 @@ function chartMatriculas(matriculas){
 
 
 function chartSemestres(semestres){
-    console.log(semestres);
     var options = {
       chart: {
           type: 'donut'

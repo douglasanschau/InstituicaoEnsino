@@ -28,4 +28,8 @@ Route::post('/cursos/instituicao_cursos', [InstituicaoController::class, 'cursos
 Route::get('/matriculas', [InstituicaoController::class, 'matriculas'])->name('matriculas');
 Route::get('/matriculas/listagem_alunos', [InstituicaoController::class, 'listaAlunos'])->name('lista_alunos');
 Route::get('/matriculas/info_aluno', [InstituicaoController::class, 'infoAluno'])->name('info_aluno');
-Route::post('/matriculas/instituicao_matriculas', [InstituicaoController::class, 'matriculasInstituicao'])->name('instituicao_matriculas');
+Route::get('/matriculas/alunos', [InstituicaoController::class, 'getAlunos'])->name('alunos');
+Route::post('/matriculas/instituicao_aluno', [InstituicaoController::class, 'instituicaoAlunos'])->name('instituicao_alunos');
+Route::post('/matriculas/instituicao_endereco', [InstituicaoController::class, 'instituicaoEnderecos'])->name('instituicao_endereco');
+Route::post('/matriculas/instituicao_matricula', [InstituicaoController::class, 'instituicaoMatriculas'])->name('instituicao_matriculas');
+Route::post('/matriculas/exclui_matricula', [InstituicaoController::class, 'excluirMatricula'])->name('exclui_matricula');

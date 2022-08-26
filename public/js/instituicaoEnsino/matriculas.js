@@ -23,6 +23,7 @@ $(document).ready(function(){
         ]
     });
 
+    getAlunos();
     $('#cpf_aluno').mask('000.000.000.00');
     $('#nascimento_aluno').mask('00/00/0000');
 });
@@ -32,18 +33,42 @@ function acoesDataTable(id, id_matricula){
                     <button type='button' class='btn btn-info edita-matricula' ref='${id}' ref-matricula="${id_matricula}" title='Editar'>
                         <i class='material-icons'>edit</i>
                     </button>
-                    <button type='button' class='btn btn-danger' ref='${id}' ref-matricula="${id_matricula}" title='Editar'>
+                    <button type='button' class='btn btn-danger exclui-matricula' ref='${id}' ref-matricula="${id_matricula}" title='Excluir'>
                         <i class='material-icons'>delete</i>
                     </button>
                 </div>`;
  return buttons;
 } 
 
+function getAlunos(id_aluno = null){
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        }, 
+        url: '/matriculas/alunos',
+        type: 'GET', 
+        dataType: 'json',
+        success:function(response){
+          selectAlunos(response, id_aluno);
+        }
+    });
+}
+
+function selectAlunos(alunos, id = null){
+    let html = "";
+    $.each(alunos, function(index, aluno){
+      let selected = aluno.id == id ? 'selected' : '';
+      html += `<option  ${selected} value="${aluno.id}">${aluno.nome} ${aluno.sobrenome}</option>`;
+    })
+    $('#aluno optgroup[label="Alunos Cadastrados"]').html(html);
+}
+
 $('.nova-matricula').on('click', function(){
-  $('#modalCadastrarMatricula #form-cadastra-matricula #aluno').val('');
-  $('#modalCadastrarMatricula #form-cadastra-matricula #aluno').attr('disabled', false);
   $('#modalCadastrarMatricula #form-cadastra-matricula input[name="acao"]').val('cadastrar');
-  limparModalMatriculas();
+  $('#modalCadastrarMatricula #form-cadastra-matricula #aluno').val('');
+  etapaAluno();
+  $('.aluno_selected, .curso_selected').hide();
+  $('.aluno_select, .curso_select').show();
   $('#modalCadastrarMatricula').modal('show');
 });
 
@@ -60,7 +85,7 @@ $('#aluno').on('change', function(){
 });
 
 function limparModalMatriculas(){
-    $('#modalCadastrarMatricula input').val('');
+    $('#modalCadastrarMatricula input:not(:input[type="hidden"])').val('');
     $('#modalCadastrarMatricula select:not(#aluno)').val('');
 }
 
@@ -81,6 +106,7 @@ function infoAlunoMatricula(id_aluno, id_matricula = null){
 }
 
 function atualizaDadosAluno(info_aluno){
+   $('#modalCadastrarMatricula #aluno_selected').val(info_aluno.nome + " " + info_aluno.sobrenome);
    $('#modalCadastrarMatricula #nome_aluno').val(info_aluno.nome);
    $('#modalCadastrarMatricula #sobrenome_aluno').val(info_aluno.sobrenome);
    $('#modalCadastrarMatricula #nascimento_aluno').val(info_aluno.data_nascimento);
@@ -101,19 +127,27 @@ function atualizaEnderecoAluno(info_endereco){
 
 function atualizaMatriculaAluno(info_matricula){
     $('#modalCadastrarMatricula #curso').val(info_matricula.curso);
+    $('#modalCadastrarMatricula #curso_selected').val($('#modalCadastrarMatricula #curso option:selected').text());
     $('#modalCadastrarMatricula #situacao').val(info_matricula.situacao);
     $('#modalCadastrarMatricula #semestre').val(info_matricula.semestre);
 }
 
 $('#salvar_matricula').on('click', function(){
-   verificaCamposMatricula();
+    let etapa = etapaAtual();
+    verificaCamposMatricula(etapa);
 });
 
-function verificaCamposMatricula() {
-    let salvar = true;
+function etapaAtual(){
+    let etapa = $('#form-cadastra-matricula input[name="etapa-cadastro"]').val();
+    return etapa;
+}
 
-    $('#form-cadastra-matricula .form-control').each(function(){
-      if($('#' + this.id).val() == ""){
+function verificaCamposMatricula(etapa) {
+    let salvar = true;
+    let campos_ignorar = {'curso_selected' : true, 'aluno_selected' : true};
+
+    $(`#form-cadastra-matricula .etapa-${etapa} .form-control`).each(function(){
+      if($('#' + this.id).val() == "" && campos_ignorar[this.id] == undefined){
          modalCampoVazio(this.id);
          salvar = false; 
          return false;
@@ -121,13 +155,8 @@ function verificaCamposMatricula() {
     });
 
     if(salvar) {
-        let form = $('#form-cadastra-matricula').serialize();
-        let acao = $('#form-cadastra-matricula input[name="acao"]').val();
-        if(acao == "cadastrar"){
-            cadastraMatricula(form);
-        } else {
-            editarMatricula(form);
-        }
+        let form = $(`#form-cadastra-matricula`).serialize();
+        atualizaMatricula(form);
     }
 }
 
@@ -141,12 +170,28 @@ function modalCampoVazio(id_campo){
     $(`#${id_campo}`).focus();
 }
 
-function cadastraMatricula(form){
+function getUrlMatricula(){
+   let etapa = etapaAtual();
+   switch(etapa){
+        case 'endereco':
+          url = "/matriculas/instituicao_endereco";
+        break;
+        case 'matricula':
+          url = "/matriculas/instituicao_matricula";
+        break;
+        default:
+          url = "/matriculas/instituicao_aluno";
+        break; 
+   }
+   return url;
+}
+
+function atualizaMatricula(form){
     $.ajax({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
         }, 
-        url: '/matriculas/instituicao_matriculas',
+        url: getUrlMatricula(),
         type: 'POST', 
         data: form,
         dataType: 'json',
@@ -155,13 +200,14 @@ function cadastraMatricula(form){
               modalMessageErro(response.validator_fails);
            } else {
                Swal.fire({
-                   title: 'Matricula Cadastrada!',
-                   message: 'Matricula cadastrada com sucesso.',
+                   title: response.title,
+                   message: response.message,
                    icon: 'success',
                });
-               $('#table-matriculas').DataTable().ajax.reload();
-               limparModalMatriculas();
-               $('#modalCadastrarMatricula #aluno').val('');
+               proximaEtapa();
+               if(response.id_aluno){
+                   getAlunos(response.id_aluno);
+               }
            }
         }
     })
@@ -175,14 +221,123 @@ function modalMessageErro(message){
     });
 }
 
+function proximaEtapa(){
+    let etapa = etapaAtual(); 
+    etapa = $("#form-cadastra-matricula input[name='acao']").val() == 'editar' && etapa == 'matricula' ? 'fechar_modal' : etapa;
+    switch(etapa){
+        case 'aluno':
+            etapaEndereco();        
+        break;
+        case 'endereco':
+            etapaMatricula();              
+        break;
+        case 'matricula': 
+          etapaAluno();
+          $('#modalCadastrarMatricula #form-cadastra-matricula #aluno').val('');
+          $('#table-matriculas').DataTable().ajax.reload();
+        break;
+        default: 
+          $('#modalCadastrarMatricula').modal('hide');
+          $('#table-matriculas').DataTable().ajax.reload();
+        break;
+    }
+}
+
+function etapaAluno(cadastrar = true){
+    $('.etapas-matricula').hide();
+    $('.etapa-aluno').show();   
+    $('#modalCadastrarMatricula #form-cadastra-matricula input[name="etapa-cadastro"]').val('aluno');
+    $('#modalCadastrarMatricula .btn-voltar').hide();
+    $('#modalCadastrarMatricula button[data-dismiss="modal"]').show();
+    $('#modalCadastrarMatricula .title-modal').html("Dados do Aluno");     
+    if(cadastrar){
+        limparModalMatriculas();
+    }  
+}
+
+function etapaEndereco(){
+    $('.etapas-matricula').hide();
+    $('.etapa-endereco').show();   
+    $('#modalCadastrarMatricula #form-cadastra-matricula input[name="etapa-cadastro"]').val('endereco');
+    $('#modalCadastrarMatricula button[data-dismiss="modal"]').hide();
+    $('#modalCadastrarMatricula .btn-voltar').show();
+    $('#modalCadastrarMatricula .title-modal').html("Endereço");       
+}
+
+
+function etapaMatricula(){
+    $('.etapas-matricula').hide();
+    $('.etapa-matricula').show();
+    $('#modalCadastrarMatricula #form-cadastra-matricula input[name="etapa-cadastro"]').val('matricula');
+    $('#modalCadastrarMatricula button[data-dismiss="modal"]').hide();
+    $('#modalCadastrarMatricula .btn-voltar').show();
+    $('#modalCadastrarMatricula .title-modal').html("Matricula");      
+}
+
+$('.btn-voltar').on('click', function(){
+   etapaAnterior();
+});
+
+function etapaAnterior(){
+    let etapa = etapaAtual(); 
+    switch(etapa){
+        case 'matricula':
+           etapaEndereco();     
+        break;
+        default:
+           etapaAluno(false);
+        break;
+    }
+}
+
 $(document).on('click', '.edita-matricula', function(){
   let id = $(this).attr('ref');
   let id_matricula = $(this).attr('ref-matricula');
   infoAlunoMatricula(id, id_matricula);
+  etapaAluno(false);
   $('#modalCadastrarMatricula #form-cadastra-matricula #aluno').val(id);
-  $('#modalCadastrarMatricula #form-cadastra-matricula #aluno').attr('disabled', true);
   $('#modalCadastrarMatricula #form-cadastra-matricula input[name="acao"]').val('editar');
+  $('.aluno_select, .curso_select').hide();
+  $('.aluno_selected, .curso_selected').show();
   $('#modalCadastrarMatricula').modal('show');
 });
+
+$(document).on('click', '.exclui-matricula', function(){
+   let id_matricula = $(this).attr('ref-matricula');
+   Swal.fire({
+       title: 'Atenção!',
+       text: 'Deseja excluír definitivamente esta matricula?',
+       icon: 'warning',
+       showCancelButton: true, 
+       cancelButtonText: "Não",
+       confirmButtonText: 'Sim',
+       cancelButtonColor: "#d9534f",
+       confirmButtonColor: "#5cb85c",
+   }).then((result) => {
+       if(result.value){
+           excluirMatricula(id_matricula);
+       }
+   });
+});
+
+function excluirMatricula(id_matricula){
+    $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+        }, 
+        url: '/matriculas/exclui_matricula',
+        type: 'POST', 
+        data: 'id_matricula=' + id_matricula,
+        dataType: 'json',
+        success:function(response){
+            Swal.fire({
+                title: 'Matricula Excluída!',
+                message: 'A matricula foi excluída com sucesso.',
+                icon: 'success',
+            }); 
+            $('#table-matriculas').DataTable().ajax.reload();
+        }
+    })
+}
 
  
